@@ -1,0 +1,5 @@
+venv
+.notebook
+index.py
+__pycache__/
+.DS_Store
