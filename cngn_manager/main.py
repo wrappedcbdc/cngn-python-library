@@ -7,10 +7,13 @@
 # 
 
 
-import requests # type: ignore
 import json
+from typing import Optional, Dict, Any
+import requests
+from requests.exceptions import RequestException, HTTPError
 from cngn_manager.AESCrypto import AESCrypto
 from cngn_manager.Ed25519Crypto import Ed25519Crypto
+
 
 """
     CNGnManager class is a wrapper around the CNGn API.
@@ -27,6 +30,7 @@ class CNGnManager:
 
     def __init__(self, api_key: str, private_key: str, encryption_key: str):
         self.api_key = api_key
+        self.api_url = self.API_URL
         self.private_key = private_key
         self.encryption_key = encryption_key
         self.client = requests.Session()
@@ -36,57 +40,55 @@ class CNGnManager:
             'Accept': 'application/json',
         })
 
-    def handle_api_error(self, error):
-        # Handle the API error
-        pass
-
-    def __make_calls(self, method: str, endpoint: str, data: dict = None) -> str:
-
-
+    def __make_calls(self, method: str, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         aes_crypto = AESCrypto()
         ed_crypto = Ed25519Crypto()
 
         try:
-            if data is not None:
-                new_data = json.dumps(data)
-                encrypted_data = aes_crypto.encrypt(new_data, self.encryption_key)
-                data = encrypted_data
-                response = self.client.request(method, f'{self.API_URL}/{self.API_CURRENT_VERSION}{endpoint}', json=data)
-            else:
-                response = self.client.request(method, f'{self.API_URL}/{self.API_CURRENT_VERSION}{endpoint}')
+            url = f'{self.api_url}/{self.API_CURRENT_VERSION}{endpoint}'
+            request_data = self._prepare_request_data(data, aes_crypto)
+            response = self._send_request(method, url, request_data)
+            return self._process_response(response, ed_crypto)
 
-            response_data = response.json()
-
-            if response_data.get("data") is not None:                
-                decrypted_response = ed_crypto.decrypt_with_private_key(self.private_key, response_data["data"])
-                response_data["data"] = json.loads(decrypted_response)
-
-            return json.dumps(response_data)
-
-        except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as e:
-            error_body = {
-                'success': False,
-                'error': 'API request failed',
-                'message': str(e),
-                'status_code': e.response.status_code if e.response else None,
-            }
-
-            if e.response:
-                resp = e.response.json()
-                message = json.loads(resp.get('message', '{}'))
-                resp["message"] = message
-                return json.dumps(resp)
-
-            return json.dumps(error_body)
-
+        except (RequestException, HTTPError) as e:
+            return self._handle_request_error(e)
         except Exception as e:
-            return json.dumps({
-                'success': False,
-                'error': 'An unexpected error occurred',
-                'message': str(e.message if hasattr(e, 'message') else str(e)),
-                'status_code': 500,
-            })
+            return self._handle_unexpected_error(e)
 
+    def _prepare_request_data(self, data: Optional[Dict[str, Any]], aes_crypto: AESCrypto) -> Optional[str]:
+        if data is None:
+            return None
+        json_data = json.dumps(data)
+        return aes_crypto.encrypt(json_data, self.encryption_key)
+
+    def _send_request(self, method: str, url: str, data: Optional[str]) -> requests.Response:
+        return self.client.request(method, url, json=data)
+
+    def _process_response(self, response: requests.Response, ed_crypto: Ed25519Crypto) -> Dict[str, Any]:
+        response_data = response.json()
+        if "data" in response_data:
+            decrypted_response = ed_crypto.decrypt_with_private_key(self.private_key, response_data["data"])
+            response_data["data"] = json.loads(decrypted_response)
+        return response_data
+
+    def _handle_request_error(self, error: RequestException) -> Dict[str, Any]:
+        if error.response:
+            return error.response.json()
+        return {
+            'success': False,
+            'error': 'API request failed',
+            'message': str(error),
+            'status_code': error.response.status_code if error.response else None,
+        }
+
+    def _handle_unexpected_error(self, error: Exception) -> Dict[str, Any]:
+        return {
+            'success': False,
+            'error': 'An unexpected error occurred',
+            'message': str(error),
+            'status_code': 500,
+        }
+    
     def get_balance(self) -> str:
         return self.__make_calls("GET", "/api/balance")
 
