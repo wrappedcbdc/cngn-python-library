@@ -3,3 +3,6 @@ venv
 index.py
 __pycache__/
 .DS_Store
+dist/
+build/
+cngn_manager.egg-info
