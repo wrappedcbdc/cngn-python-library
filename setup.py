@@ -4,15 +4,9 @@ from setuptools import setup, find_packages
 
 # Dictionary to hold package metadata
 about = {}
-
-# Set the current directory as the base directory
 here = os.path.abspath(os.path.dirname(__file__))
-
-# Read the __version__.py file to get version info
 with open(os.path.join(here, "cngn_manager", "__version__.py"), "r", encoding="utf-8") as f:
     exec(f.read(), about)
-
-# Read the README.md file for long description
 with open(os.path.join(here, "README.md"), "r", encoding="utf-8") as f:
     readme = f.read()
 
@@ -21,6 +15,11 @@ requires = [
     "requests",
     "cryptography==43.0.1",
     "pynacl==1.5.0",
+    "mnemonic==0.20",
+    "bip32utils==0.3.post4",
+    "hashlib",
+    "tronpy",
+    "stellar-sdk==11.1.0",
 ]
 
 # Define test dependencies
@@ -31,6 +30,7 @@ test_requirements = [
     "pytest-xdist",
     "PySocks>=1.5.6, !=1.5.7",
     "pytest>=3",
+
 ]
 
 # Setup function to handle packaging

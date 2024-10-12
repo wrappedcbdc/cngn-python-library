@@ -11,8 +11,9 @@ import json
 from typing import Optional, Dict, Any
 import requests
 from requests.exceptions import RequestException, HTTPError
-from cngn_manager.AESCrypto import AESCrypto
-from cngn_manager.Ed25519Crypto import Ed25519Crypto
+from .AESCrypto import AESCrypto
+from .Ed25519Crypto import Ed25519Crypto
+from .CryptoWallet import CryptoWallet
 
 
 """
@@ -106,3 +107,13 @@ class CNGnManager:
 
     def whitelist_address(self, data: dict) -> str:
         return self.__make_calls("POST", "/api/whiteListAddress", data)
+
+    def generate_wallet_address(self, network: str) -> str:
+        response =  CryptoWallet.generate_wallet_with_mnemonic_details(network)
+        return {
+            "success": True,
+            "data": response
+        }
+
+    def validate_address(self, address, network):
+        return CryptoWallet.validate_address(address, network)
