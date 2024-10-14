@@ -108,6 +108,15 @@ print(virtual_account)
 
 ```
 
+### Generate Wallet Address
+
+```python
+
+wallet_address = manager.generate_wallet_address(Network.BSC)
+print(wallet_address)
+
+```
+
 ### Whitelist Address
 
 ```python
