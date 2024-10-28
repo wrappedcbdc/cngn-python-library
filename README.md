@@ -153,6 +153,7 @@ Address Options:
 
 
 ```python
+
 updateData  = {
     "walletAddress": {
         "bscAddress": "0x1234...",
@@ -173,7 +174,7 @@ print(updateResult)
 #### Get banks
 ```python
 
-banklist = manager.get_banks(updateData)
+banklist = manager.get_banks()
 print(banklist)
 
 ```
