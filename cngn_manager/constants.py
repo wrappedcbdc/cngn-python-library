@@ -5,10 +5,16 @@ class Network:
     MATIC = "matic"
     TRX = "trx"
     XBN = "xbn"
+    BASE = "base"
     
-    # Add other network options if necessary
+class AssetType: 
+    FIAT = "fiat"
+    WRAPPED = "wrapped" 
+    ENAIRA = "enaira"
+
+
 
 class ProviderType:
     KORAPAY = "korapay"
-    FLUTTERWAVE = "Flutterwave"
+    BUDPAY = "budpay"
     # Add other provider types as needed

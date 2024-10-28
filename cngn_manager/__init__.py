@@ -12,5 +12,7 @@ cNGN HTTP Library
 
 """
 
-from .main import CNGnManager
+from .main import CNGnManager 
 from .constants import Network, ProviderType
+from .WalletManager import WalletManager 
+

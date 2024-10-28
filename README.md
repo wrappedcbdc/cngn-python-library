@@ -7,6 +7,8 @@ CNGnManager is a Python library for interacting with a CNGN API. It provides a s
 - [Installation](#installation)
 - [Usage](#usage)
 - [Available Methods](#available-methods)
+    - [cNGNManager Methods](#cngnmanager-methods)
+    - [WalletManager Methods](#walletmanager-methods)
 - [Testing](#testing)
 - [Error Handling](#error-handling)
 - [Types](#types)
@@ -25,10 +27,10 @@ pip install cngn-manager
 
 ## Usage
 
-First, import the `CNGnManager` class using it namespace WrappedCBDC\CNGNManager: and all necessary constants.
+First, import the `CNGnManager` `WalletManager` class using and all necessary constants.
 
 ```python
-from cngn_manager import CNGnManager, Network, ProviderType
+from cngn_manager import CNGnManager, WalletManager, Network, ProviderType, AssetType
 ```
 
 Then, create an instance of `CNGnManager` with your secrets:
@@ -51,16 +53,30 @@ balance = manager.get_balance()
 print(balance)
 ```
 
+## Networks
+
+The library supports multiple blockchain networks:
+
+- `Network.bsc` - Binance Smart Chain
+- `Network.atc` - Asset Chain
+- `Network.xbn` - Bantu Chain
+- `Network.eth` - Ethereum
+- `Network.matic` - Polygon (Matic)
+- `Network.trx` - Tron
+- `Network.base` - Base
+
 ## Available Methods
 
-### Get Balance
+### cNGNManager Methods
+
+#### Get Balance
 
 ```python
 balance = manager.get_balance()
 print(balance)
 ```
 
-### Get Transaction History
+#### Get Transaction History
 
 ```python
 transactions = manager.get_transaction_history()
@@ -68,13 +84,14 @@ print(transactions)
 
 ```
 
-### Swap Between Chains
+#### Swap Between Chains
 
 ```python
 swap_params = {
     "amount": 100,
     "address": "0x1234...",
-    "network": Network.BSC
+    "network": Network.BSC,
+    "shouldSaveAddress": True
 }
 
 swap_result = manager.swap_between_chains(swap_params)
@@ -82,13 +99,14 @@ print(swap_result)
 
 ```
 
-### Deposit for Redemption
+#### Redeem Asset
 
 ```python
 deposit_params = {
     "amount": 1000,
-    "bank": "Example Bank",
-    "accountNumber": "1234567890"
+    "bankCode": "123",
+    "accountNumber": "1234567890",
+    "saveDetails": True
 }
 
 deposit_result = manager.deposit_for_redemption(deposit_params)
@@ -96,7 +114,9 @@ print(deposit_result)
 
 ```
 
-### Create Virtual Account
+NOTE: to get bank codes please use the getBanks method to fetch the list of banks and ther codes 
+
+#### Create Virtual Account
 
 ```python
 mint_params = {
@@ -108,7 +128,9 @@ print(virtual_account)
 
 ```
 
-### Generate Wallet Address
+NOTE: before creating the virtual account you need to have updated your BVN on the dashboard
+
+#### Generate Wallet Address
 
 ```python
 
@@ -117,19 +139,64 @@ print(wallet_address)
 
 ```
 
-### Whitelist Address
+#### Update Business
+
+Address Options:
+        "xbnAddress": "string";
+        "bscAddress": "string";
+        "atcAddress": "string";
+        "polygonAddress": "string";
+        "ethAddress": "string";
+        "tronAddress": "string";
+        "baseAddress": "string";
+        "bantuUserId": "string";
+
 
 ```python
-whitelist_params = {
-    "bscAddress": "0x1234...",
-    "bankName": "Example Bank",
-    "bankAccountNumber": "1234567890"
+updateData  = {
+    "walletAddress": {
+        "bscAddress": "0x1234...",
+        #other chain addresses...
+    },
+    "bankDetails": {
+        "bankName": 'Test Bank',
+        "bankAccountName": 'Test Account',
+        "bankAccountNumber": '1234567890'
+    }
 }
 
-whitelist_result = manager.whitelist_address(whitelist_params)
-print(whitelist_result)
+updateResult = manager.update_external_accounts(updateData)
+print(updateResult)
 
 ```
+
+#### Get banks
+```python
+
+banklist = manager.get_banks(updateData)
+print(banklist)
+
+```
+
+
+### WalletManager Methods
+
+#### Generate Wallet Address
+```python
+    wallet = WalletManager.generate_wallet_address(Network.bsc);
+```
+
+Response format:
+```python
+ {
+    "mnemonic" : "string";
+    "address": "string";
+    "network": Network;
+    "privateKey": "string";
+}
+```
+
+
 
 ## Testing
 
@@ -156,21 +223,34 @@ The tests are located in the `tests` directory. They cover various aspects of th
 
 The library uses a custom error handling mechanism. All API errors are caught and thrown as `Error` objects with descriptive messages.
 
-## Types
+## Constants
 
-The library includes python definitions for all parameters and return types. Please refer to the type definitions in the source code for more details.
+The library includes python constant classes for all parameters:
+
+- `Network` - token network
+- `AssetType` - Asset constants
+- `ProviderType` - provider constants
 
 ## Security
 
-This library uses AES encryption for request payloads and Ed25519 decryption for response data. Ensure that your `encryptionKey` and `privateKey` are kept secure.
+- Uses AES encryption for request data
+- Implements Ed25519 decryption for responses
+- Requires secure storage of API credentials
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome. Feel free to check [issues page](https://github.com/wrappedcbdc/cngn-python-library/issues) if you want to contribute.
+To contribute:
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Create a Pull Request
 
 ## Support
 
-If you have any questions or need help using the library, please open an issue in the GitHub repository.
+For support, please:
+- Open an issue in the GitHub repository
+- Check existing documentation
+- Contact the support team
 
 ## License
 

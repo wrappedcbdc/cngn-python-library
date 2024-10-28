@@ -13,8 +13,6 @@ import requests
 from requests.exceptions import RequestException, HTTPError
 from .AESCrypto import AESCrypto
 from .Ed25519Crypto import Ed25519Crypto
-from .CryptoWallet import CryptoWallet
-
 
 """
     CNGnManager class is a wrapper around the CNGn API.
@@ -46,7 +44,7 @@ class CNGnManager:
         ed_crypto = Ed25519Crypto()
 
         try:
-            url = f'{self.api_url}/{self.API_CURRENT_VERSION}{endpoint}'
+            url = f'{self.api_url}/{self.API_CURRENT_VERSION}/api{endpoint}'
             request_data = self._prepare_request_data(data, aes_crypto)
             response = self._send_request(method, url, request_data)
             return self._process_response(response, ed_crypto)
@@ -91,29 +89,23 @@ class CNGnManager:
         }
     
     def get_balance(self) -> str:
-        return self.__make_calls("GET", "/api/balance")
+        return self.__make_calls("GET", "/balance")
 
     def get_transaction_history(self) -> str:
-        return self.__make_calls("GET", "/api/transactions")
+        return self.__make_calls("GET", "/transactions")
 
     def swap_between_chains(self, data: dict) -> str:
-        return self.__make_calls("POST", "/api/swap", data)
+        return self.__make_calls("POST", "/swap", data)
 
-    def deposit_for_redemption(self, data: dict) -> str:
-        return self.__make_calls("POST", "/api/deposit", data)
+    def redeem_assets(self, data: dict) -> str:
+        return self.__make_calls("POST", "/redeemAsset", data)
 
     def create_virtual_account(self, data: dict) -> str:
-        return self.__make_calls("POST", "/api/createVirtualAccount", data)
+        return self.__make_calls("POST", "/createVirtualAccount", data)
 
-    def whitelist_address(self, data: dict) -> str:
-        return self.__make_calls("POST", "/api/whiteListAddress", data)
+    def update_external_accounts(self, data: dict) -> str:
+        return self.__make_calls("POST", "/updateBusiness", data)
 
-    def generate_wallet_address(self, network: str) -> str:
-        response =  CryptoWallet.generate_wallet_with_mnemonic_details(network)
-        return {
-            "success": True,
-            "data": response
-        }
-
-    def validate_address(self, address, network):
-        return CryptoWallet.validate_address(address, network)
+    def get_banks(self):
+        return self.__make_calls("GET", "/banks")
+    
