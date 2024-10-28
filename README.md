@@ -57,13 +57,13 @@ print(balance)
 
 The library supports multiple blockchain networks:
 
-- `Network.bsc` - Binance Smart Chain
-- `Network.atc` - Asset Chain
-- `Network.xbn` - Bantu Chain
-- `Network.eth` - Ethereum
-- `Network.matic` - Polygon (Matic)
-- `Network.trx` - Tron
-- `Network.base` - Base
+- `Network.BSC` - Binance Smart Chain
+- `Network.ATC` - Asset Chain
+- `Network.XBN` - Bantu Chain
+- `Network.ETTH` - Ethereum
+- `Network.MATIC` - Polygon (Matic)
+- `Network.TRX` - Tron
+- `Network.BASE` - Base
 
 ## Available Methods
 
@@ -142,15 +142,14 @@ print(wallet_address)
 #### Update Business
 
 Address Options:
-        "xbnAddress": "string";
-        "bscAddress": "string";
-        "atcAddress": "string";
-        "polygonAddress": "string";
-        "ethAddress": "string";
-        "tronAddress": "string";
-        "baseAddress": "string";
-        "bantuUserId": "string";
-
+- "xbnAddress": "string";
+- "bscAddress": "string";
+- "atcAddress": "string";
+- "polygonAddress": "string";
+- "ethAddress": "string";
+- "tronAddress": "string";
+- "baseAddress": "string";
+- "bantuUserId": "string";
 
 ```python
 
