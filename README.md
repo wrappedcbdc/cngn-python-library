@@ -84,7 +84,7 @@ print(transactions)
 
 ```
 
-#### Swap Between Chains
+#### Withdraw from chains
 
 ```python
 swap_params = {
@@ -109,13 +109,12 @@ deposit_params = {
     "saveDetails": True
 }
 
-deposit_result = manager.deposit_for_redemption(deposit_params)
+deposit_result = manager.redeem_assets(deposit_params)
 print(deposit_result)
 
 ```
 
 NOTE: to get bank codes please use the getBanks method to fetch the list of banks and ther codes 
-
 
 #### Create Virtual Account
 
@@ -131,14 +130,6 @@ print(virtual_account)
 
 NOTE: before creating the virtual account you need to have updated your BVN on the dashboard
 
-#### Generate Wallet Address
-
-```python
-
-wallet_address = manager.generate_wallet_address(Network.BSC)
-print(wallet_address)
-
-```
 
 #### Update Business
 
