@@ -94,8 +94,8 @@ class CNGnManager:
     def get_transaction_history(self) -> str:
         return self.__make_calls("GET", "/transactions")
 
-    def swap_between_chains(self, data: dict) -> str:
-        return self.__make_calls("POST", "/swap", data)
+    def withdraw(self, data: dict) -> str:
+        return self.__make_calls("POST", "/withdraw", data)
 
     def redeem_assets(self, data: dict) -> str:
         return self.__make_calls("POST", "/redeemAsset", data)

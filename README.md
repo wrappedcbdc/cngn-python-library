@@ -94,7 +94,7 @@ swap_params = {
     "shouldSaveAddress": True
 }
 
-swap_result = manager.swap_between_chains(swap_params)
+swap_result = manager.withdraw(swap_params)
 print(swap_result)
 
 ```
@@ -115,6 +115,7 @@ print(deposit_result)
 ```
 
 NOTE: to get bank codes please use the getBanks method to fetch the list of banks and ther codes 
+
 
 #### Create Virtual Account
 
