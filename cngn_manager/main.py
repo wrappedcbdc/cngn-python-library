@@ -24,7 +24,7 @@ from .Ed25519Crypto import Ed25519Crypto
 """
 
 class CNGnManager:
-    API_URL = "https://staging.api.wrapcbdc.com"
+    API_URL = "https://api.cngn.co"
     API_CURRENT_VERSION = "v1"
 
     def __init__(self, api_key: str, private_key: str, encryption_key: str):
@@ -91,8 +91,8 @@ class CNGnManager:
     def get_balance(self) -> str:
         return self.__make_calls("GET", "/balance")
 
-    def get_transaction_history(self) -> str:
-        return self.__make_calls("GET", "/transactions")
+    def get_transaction_history(self, page: int = 1, limit: int = 10 ) -> str:
+        return self.__make_calls("GET", f"/transactions?page{page}&limit={limit}")
 
     def withdraw(self, data: dict) -> str:
         return self.__make_calls("POST", "/withdraw", data)
@@ -108,4 +108,7 @@ class CNGnManager:
 
     def get_banks(self):
         return self.__make_calls("GET", "/banks")
+    
+    def swap_asset(self, data: dict) -> str:
+        return self.__make_calls("POST", "/swap", data)
     
