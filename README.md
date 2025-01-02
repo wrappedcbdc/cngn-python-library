@@ -79,7 +79,9 @@ print(balance)
 #### Get Transaction History
 
 ```python
-transactions = manager.get_transaction_history()
+page = 1
+limit = 10
+transactions = manager.get_transaction_history(page, limit)
 print(transactions)
 
 ```
@@ -87,15 +89,15 @@ print(transactions)
 #### Withdraw from chains
 
 ```python
-swap_params = {
+withdraw_params = {
     "amount": 100,
     "address": "0x1234...",
     "network": Network.BSC,
     "shouldSaveAddress": True
 }
 
-swap_result = manager.withdraw(swap_params)
-print(swap_result)
+withdraw_result = manager.withdraw(withdraw_params)
+print(withdraw_result)
 
 ```
 
@@ -120,14 +122,30 @@ NOTE: to get bank codes please use the getBanks method to fetch the list of bank
 
 ```python
 mint_params = {
-    "provider": ProviderType.KORAPAY
+    "provider": ProviderType.KORAPAY,
+    "bank_code": '011'
 }
 
 virtual_account = manager.create_virtual_account(mint_params)
 print(virtual_account)
 
 ```
+NOTE: before creating the virtual account you need to have updated your BVN on the dashboard
 
+#### Swap Asset
+
+```python
+swap_data = {
+    "destinationNetwork": Network.BSC,
+    "destinationAddress": '0x123...',
+    "originNetwork": Network.ETH,
+    "callbackUrl": 'https://your-callback-url.com' // optional
+}
+
+swap_result = manager.swap_asset(swap_data)
+print(swap_result)
+
+```
 NOTE: before creating the virtual account you need to have updated your BVN on the dashboard
 
 
