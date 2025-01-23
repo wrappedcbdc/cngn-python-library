@@ -10,7 +10,7 @@
 __title__ = "cngn_manager"
 __description__ = "Python HTTP for Humans."
 __url__ = "https://docs.cngn.co"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "Emmanuel Onyo"
 __author_email__ = "emmanuel.onyo@withconvexity.com"
 __license__ = "MIT License"
