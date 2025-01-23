@@ -97,6 +97,9 @@ class CNGnManager:
     def withdraw(self, data: dict) -> str:
         return self.__make_calls("POST", "/withdraw", data)
 
+    def verify_withdrawal(self, tnxRef: str):
+        return self.__make_calls('GET', f"/withdraw/verify/{tnxRef}")
+
     def redeem_assets(self, data: dict) -> str:
         return self.__make_calls("POST", "/redeemAsset", data)
 

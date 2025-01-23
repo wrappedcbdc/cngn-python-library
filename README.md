@@ -101,6 +101,16 @@ print(withdraw_result)
 
 ```
 
+#### Verify Withdrawal Reference
+
+```python
+tnxRef =  '123-456-789-789405'
+
+verify_result = manager.verify_withdrawal(withdraw_params)
+print(verify_result)
+
+```
+
 #### Redeem Asset
 
 ```python
