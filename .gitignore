@@ -6,3 +6,5 @@ __pycache__/
 dist/
 build/
 cngn_manager.egg-info
+cngn_ssh
+cngn_ssh.pub

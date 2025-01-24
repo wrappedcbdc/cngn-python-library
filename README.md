@@ -79,8 +79,8 @@ print(balance)
 #### Get Transaction History
 
 ```python
-page = 1
-limit = 10
+page = 1 #page
+limit = 10 #limit
 transactions = manager.get_transaction_history(page, limit)
 print(transactions)
 
@@ -90,10 +90,10 @@ print(transactions)
 
 ```python
 withdraw_params = {
-    "amount": 100,
-    "address": "0x1234...",
-    "network": Network.BSC,
-    "shouldSaveAddress": True
+    "amount": 100, # amount
+    "address": "0x1234...", # address
+    "network": Network.BSC, # network
+    "shouldSaveAddress": True 
 }
 
 withdraw_result = manager.withdraw(withdraw_params)
@@ -104,7 +104,7 @@ print(withdraw_result)
 #### Verify Withdrawal Reference
 
 ```python
-tnxRef =  '123-456-789-789405'
+tnxRef =  '123-456-789-789405' # Transaction Ref
 
 verify_result = manager.verify_withdrawal(withdraw_params)
 print(verify_result)
@@ -115,9 +115,9 @@ print(verify_result)
 
 ```python
 deposit_params = {
-    "amount": 1000,
-    "bankCode": "123",
-    "accountNumber": "1234567890",
+    "amount": 1000, # Amount
+    "bankCode": "123", # bankCode
+    "accountNumber": "1234567890", # Account Number
     "saveDetails": True
 }
 
@@ -132,8 +132,8 @@ NOTE: to get bank codes please use the getBanks method to fetch the list of bank
 
 ```python
 mint_params = {
-    "provider": ProviderType.KORAPAY,
-    "bank_code": '011'
+    "provider": ProviderType.KORAPAY, # provider
+    "bank_code": '011' # bank_code
 }
 
 virtual_account = manager.create_virtual_account(mint_params)
@@ -146,10 +146,10 @@ NOTE: before creating the virtual account you need to have updated your BVN on t
 
 ```python
 swap_data = {
-    "destinationNetwork": Network.BSC,
-    "destinationAddress": '0x123...',
-    "originNetwork": Network.ETH,
-    "callbackUrl": 'https://your-callback-url.com' // optional
+    "destinationNetwork": Network.BSC, #destinationNetwork
+    "destinationAddress": '0x123...', # destinationAddress
+    "originNetwork": Network.ETH, # originNetwork
+    "callbackUrl": 'https://your-callback-url.com' # optional
 }
 
 swap_result = manager.swap_asset(swap_data)
@@ -175,13 +175,13 @@ Address Options:
 
 updateData  = {
     "walletAddress": {
-        "bscAddress": "0x1234...",
+        "bscAddress": "0x1234...", #bscAddress
         #other chain addresses...
     },
     "bankDetails": {
-        "bankName": 'Test Bank',
-        "bankAccountName": 'Test Account',
-        "bankAccountNumber": '1234567890'
+        "bankName": 'Test Bank', # bankName
+        "bankAccountName": 'Test Account', #bankAccountName
+        "bankAccountNumber": '1234567890' # bankAccountNumber
     }
 }
 
