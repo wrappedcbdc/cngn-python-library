@@ -115,3 +115,6 @@ class CNGnManager:
     def swap_asset(self, data: dict) -> str:
         return self.__make_calls("POST", "/swap", data)
     
+    def swap_quote(self, data: dict) -> str:
+        return self.__make_calls("POST", "/swap-quote", data)
+    
