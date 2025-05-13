@@ -126,7 +126,7 @@ print(deposit_result)
 
 ```
 
-NOTE: to get bank codes please use the getBanks method to fetch the list of banks and ther codes 
+NOTE: to get bank codes please use the getBanks method to fetch the list of banks and their codes 
 
 #### Create Virtual Account
 
@@ -142,7 +142,7 @@ print(virtual_account)
 ```
 NOTE: before creating the virtual account you need to have updated your BVN on the dashboard
 
-#### Swap Asset
+#### Bridge Asset
 
 ```python
 swap_data = {
