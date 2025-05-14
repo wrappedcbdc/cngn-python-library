@@ -156,7 +156,20 @@ swap_result = manager.swap_asset(swap_data)
 print(swap_result)
 
 ```
-NOTE: before creating the virtual account you need to have updated your BVN on the dashboard
+#### Swap Quotes
+
+```python
+swap_data = {
+    "destinationNetwork": Network.BSC, #destinationNetwork
+    "destinationAddress": '0x123...', # destinationAddress
+    "originNetwork": Network.ETH, # originNetwork
+    "amount": 1000
+}
+
+swap_result = manager.swap_quote(swap_data)
+print(swap_result)
+
+```
 
 
 #### Update Business
