@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cngn-manager"
+dynamic = ["version"]
+description = "Official Python SDK for the cNGN API — the regulated Nigerian Naira stablecoin"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Wrapped CBDC / Convexity", email = "support@cngn.co" },
+]
+keywords = ["cngn", "stablecoin", "naira", "nigeria", "crypto", "payments"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "httpx>=0.28",
+    "pydantic>=2.10",
+    "cryptography",
+    "pynacl",
+]
+
+[project.optional-dependencies]
+wallet = [
+    "mnemonic",
+    "bip32utils",
+    "tronpy",
+    "stellar-sdk",
+]
+
+[project.urls]
+Homepage = "https://cngn.co"
+Documentation = "https://docs.cngn.co"
+Source = "https://github.com/Convexity-Protocol/cngn-python-library"
+
+[tool.hatch.version]
+path = "src/cngn/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cngn"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/cngn", "README.md", "LICENSE", "pyproject.toml"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "respx>=0.22",
+    "ruff>=0.8",
+    "ty>=0.0.1a1",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ty.rules]
