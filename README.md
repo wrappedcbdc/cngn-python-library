@@ -10,24 +10,56 @@ pip install cngn
 
 Use `pip install "cngn[wallet]"` to include wallet helpers.
 
-## Usage
+## Async usage
 
 ```python
-from cngn import CNGN
+import asyncio
 
-with CNGN(
-    api_key="cngn_test_...",
-    encryption_key="...",
-    private_key=open("cngn_ed25519").read(),
-) as client:
-    print(client.get_balance())
+from cngn import AsyncCNGN
+
+
+async def main() -> None:
+    async with AsyncCNGN(
+        api_key="cngn_test_...",
+        encryption_key="...",
+        private_key=open("cngn_ed25519").read(),
+    ) as client:
+        balances = await client.get_balance()
+        networks = await client.get_networks()
+        print(balances, networks)
+
+
+asyncio.run(main())
 ```
 
-Use `AsyncCNGN` for async applications. Manage API keys, encryption keys,
-Ed25519 keys, and IP allowlisting at [app.cngn.co](https://app.cngn.co).
+`AsyncCNGN` is recommended for applications and services. Use `CNGN` for
+synchronous code; it exposes the same methods without `await`.
 
-## Links
+## Features
 
-- [Documentation](https://docs.cngn.co)
-- [PyPI](https://pypi.org/project/cngn/)
-- [License](LICENSE)
+- Balances and paginated transactions
+- Dedicated and temporary virtual accounts
+- Bank verification and cNGN redemption
+- On-chain withdrawals and address whitelisting
+- Cross-network quotes and bridges
+- Webhook signature verification
+- Optional wallet generation and validation
+
+```python
+account = await client.create_temporary_virtual_account(
+    amount=5000,
+    customer_email="user@example.com",
+    customer_name="Ada Obi",
+    account_name="ACME Checkout",
+)
+
+quote = await client.get_bridge_quote(
+    amount=250,
+    origin_network_id="...",
+    destination_network_id="...",
+    destination_address="0x...",
+)
+```
+
+Manage API keys, encryption keys, Ed25519 keys, and IP allowlisting at
+[app.cngn.co](https://app.cngn.co). Test and live credentials are separate.
