@@ -133,7 +133,7 @@ class AsyncCNGN:
 
         Each page is one API request; the API budget is 20 requests per
         60 seconds per key, so iterating thousands of transactions can hit
-        the rate limit — the client retries 429s automatically after the
+        the rate limit. The client retries 429s automatically after the
         60-second block.
         """
         page = 1

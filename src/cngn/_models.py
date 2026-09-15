@@ -1,7 +1,7 @@
 """Pydantic v2 models for cNGN API resources.
 
 All models allow extra fields so new API fields never break parsing.
-Amounts are kept as strings exactly as the API returns them — no float
+Amounts are kept as strings exactly as the API returns them; no float
 conversion is performed, preserving decimal precision.
 """
 

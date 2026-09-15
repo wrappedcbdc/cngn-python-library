@@ -2,7 +2,7 @@
 
 cNGN signs webhooks with ``X-cNGN-Signature: sha256=<hex>``, an
 HMAC-SHA256 of the raw request body keyed with the dashboard signing
-secret. The SDK only verifies — merchants receive webhooks on their own
+secret. The SDK only verifies signatures; merchants receive webhooks on their own
 infrastructure. Always capture the raw body (Flask: ``request.get_data()``,
 FastAPI: ``await request.body()``) before parsing.
 """
@@ -50,7 +50,7 @@ class WebhookEvent(CNGNModel):
 def verify_webhook_signature(raw_body: bytes, signature_header: str | None, secret: str) -> bool:
     """Verify the ``X-cNGN-Signature`` header against the raw request body.
 
-    Returns False when the header is missing or malformed — never raises.
+    Returns False when the header is missing or malformed and never raises.
     Payloads are unsigned when no signing secret is configured on the
     dashboard; in that case this check cannot be performed.
     """
