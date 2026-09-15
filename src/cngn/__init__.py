@@ -36,7 +36,7 @@ from ._models import (
 from ._sync import CNGN
 from ._webhooks import WebhookData, WebhookEvent, parse_webhook, verify_webhook_signature
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 __all__ = [
     "CNGN",
