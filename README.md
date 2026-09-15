@@ -1,4 +1,4 @@
-# cngn-manager (cNGN Python SDK)
+# cngn (cNGN Python SDK)
 
 The official Python SDK for the [cNGN API](https://docs.cngn.co) — cNGN is a
 regulated Nigerian Naira stablecoin from Wrapped CBDC.
@@ -18,9 +18,9 @@ Requires Python 3.10+.
 ## Installation
 
 ```bash
-pip install cngn-manager
+pip install cngn
 # with the optional HD wallet helpers:
-pip install "cngn-manager[wallet]"
+pip install "cngn[wallet]"
 ```
 
 ## Getting credentials
@@ -191,8 +191,8 @@ Ethereum, Base, BSC and Polygon share the EVM derivation path; Tron derives at
 
 v2 is a ground-up rewrite. Highlights:
 
-- `import cngn_manager` → `import cngn` (package name on PyPI is unchanged:
-  `pip install cngn-manager`).
+- `import cngn_manager` → `import cngn` (package name on PyPI is now `cngn`:
+  `pip install cngn`, replacing the old `cngn-manager` distribution).
 - Errors are now **raised** as typed exceptions instead of returned as
   `{"success": False}` dicts.
 - Wallet helpers moved to the optional `[wallet]` extra; `Network.BASE` now

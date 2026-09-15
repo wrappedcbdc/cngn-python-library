@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "cngn-manager"
+name = "cngn"
 dynamic = ["version"]
 description = "Official Python SDK for the cNGN API — the regulated Nigerian Naira stablecoin"
 readme = "README.md"
@@ -42,7 +42,7 @@ wallet = [
 [project.urls]
 Homepage = "https://cngn.co"
 Documentation = "https://docs.cngn.co"
-Source = "https://github.com/Convexity-Protocol/cngn-python-library"
+Source = "https://github.com/wrappedcbdc/cngn-python-library"
 
 [tool.hatch.version]
 path = "src/cngn/__init__.py"
