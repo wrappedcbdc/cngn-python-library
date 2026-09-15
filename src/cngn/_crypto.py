@@ -152,7 +152,7 @@ def decrypt_response_data(b64_blob: str, openssh_pem: str) -> Any:
     """Decrypt the base64 ``data`` field of a cNGN success response.
 
     Blob layout: ``nonce (24) || NaCl Box ciphertext || ephemeral pubkey (32)``.
-    Returns the decrypted JSON value — an object for most endpoints, a list
+    Returns the decrypted JSON value: an object for most endpoints, a list
     for collection endpoints such as ``/balance``.
     """
     try:

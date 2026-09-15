@@ -1,8 +1,7 @@
 """HD wallet address generation and validation.
 
 EVM networks (Ethereum, Base, BSC, Polygon) share the derivation path
-``m/44'/60'/0'/0/0`` — Base support was added in v2 (v1 raised
-``Network.BASE unsupported``). Tron derives at ``m/44'/195'/0'/0/0`` and
+``m/44'/60'/0'/0/0``. Tron derives at ``m/44'/195'/0'/0/0`` and
 Stellar follows SEP-0005 (``m/44'/148'/0'``).
 """
 

@@ -1,4 +1,4 @@
-"""Wallet tests — gated on the optional [wallet] extra dependencies."""
+"""Wallet tests gated on the optional [wallet] extra dependencies."""
 
 from __future__ import annotations
 
