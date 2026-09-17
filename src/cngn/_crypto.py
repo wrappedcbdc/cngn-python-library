@@ -138,14 +138,14 @@ def parse_openssh_ed25519_private_key(pem: str) -> bytes:
             f"Expected an 'ssh-ed25519' key, got '{key_type.decode('utf-8', errors='replace')}'"
         )
     _read_string(private_block)  # public key
-    private_key = _read_string(private_block)  # public key (32) || seed (32)
+    private_key = _read_string(private_block)  # seed (32) || public key (32)
     if len(private_key) != 64:
         raise DecryptionError(f"Ed25519 private key must be 64 bytes, found {len(private_key)}")
     _read_string(private_block)  # comment
     padding = private_block.read()
     if any(padding[i] != i + 1 for i in range(len(padding))):
         raise DecryptionError("OpenSSH private block padding is malformed")
-    return private_key[32:]
+    return private_key[:32]
 
 
 def decrypt_response_data(b64_blob: str, openssh_pem: str) -> Any:

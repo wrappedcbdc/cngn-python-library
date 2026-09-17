@@ -173,6 +173,53 @@ def test_decrypt_response_data_rejects_bad_base64(openssh_pem: str) -> None:
         decrypt_response_data("!!!", openssh_pem)
 
 
+# These two tests generate a real `ssh-keygen -t ed25519` keypair at test time
+# (no key material is checked in). They guard the OpenSSH private-block
+# layout: the 64-byte private field is seed (32) || public key (32) — taking
+# the wrong half as the seed silently derives a garbage key and every server
+# response becomes undecryptable.
+
+
+@pytest.fixture()
+def ssh_keygen_keypair(tmp_path):
+    """A real ssh-keygen-produced Ed25519 keypair (PEM + embedded public key)."""
+    import shutil
+    import subprocess
+
+    if shutil.which("ssh-keygen") is None:
+        pytest.skip("ssh-keygen is not available")
+    key_path = tmp_path / "id_ed25519"
+    subprocess.run(
+        ["ssh-keygen", "-t", "ed25519", "-N", "", "-C", "cngn-sdk-test", "-f", key_path, "-q"],
+        check=True,
+    )
+    pub_blob = base64.b64decode(key_path.with_suffix(".pub").read_text().split()[1])
+    return key_path.read_text(), pub_blob[-32:]
+
+
+def test_openssh_parse_matches_real_ssh_keygen_layout(ssh_keygen_keypair) -> None:
+    """The parsed seed must derive the public key ssh-keygen embedded."""
+    pem, embedded_pub = ssh_keygen_keypair
+    seed = parse_openssh_ed25519_private_key(pem)
+    assert SigningKey(seed).verify_key.encode() == embedded_pub
+
+
+def test_decrypt_response_data_with_real_ssh_keygen_key(ssh_keygen_keypair) -> None:
+    """A blob sealed to the pk-converted pub decrypts with the real PEM."""
+    pem, embedded_pub = ssh_keygen_keypair
+    merchant_curve_pub = crypto_sign_ed25519_pk_to_curve25519(embedded_pub)
+    data = [{"asset": "cNGN", "available_balance": "42.50"}]
+    ephemeral = PrivateKey.generate()
+    nonce = b"\x03" * 24
+    ciphertext = (
+        Box(ephemeral, PublicKey(merchant_curve_pub))
+        .encrypt(json.dumps(data).encode(), nonce)
+        .ciphertext
+    )
+    blob = base64.b64encode(nonce + ciphertext + bytes(ephemeral.public_key)).decode()
+    assert decrypt_response_data(blob, pem) == data
+
+
 def test_decrypt_response_data_rejects_short_blob(openssh_pem: str) -> None:
     blob = base64.b64encode(b"\x00" * 20).decode()
     with pytest.raises(DecryptionError, match="too short"):

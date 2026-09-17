@@ -399,6 +399,120 @@ def test_encrypted_envelope_shape(
     assert len(base64.b64decode(body["iv"])) == 16
 
 
+def test_per_call_idempotency_key_on_money_endpoints(
+    client: CNGN, router: respx.MockRouter, ed25519_seed: bytes
+) -> None:
+    temporary = router.post("/virtual-account/temporary").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    redeem = router.post("/redeemAsset").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    withdraw = router.post("/withdraw").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    bridge = router.post("/bridge").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    client.create_temporary_virtual_account(
+        amount=1000,
+        customer_email="user@example.com",
+        customer_name="Test User",
+        account_name="CNGN/ACME",
+        idempotency_key="key-temporary",
+    )
+    client.redeem_asset(
+        amount=100, bank_code="058", account_number="0123456789", idempotency_key="key-redeem"
+    )
+    client.withdraw(amount=10, address="0xabc", network_id="n1", idempotency_key="key-withdraw")
+    client.bridge("n1", "n2", "0xabc", idempotency_key="key-bridge")
+    assert temporary.calls.last.request.headers["Idempotency-Key"] == "key-temporary"
+    assert redeem.calls.last.request.headers["Idempotency-Key"] == "key-redeem"
+    assert withdraw.calls.last.request.headers["Idempotency-Key"] == "key-withdraw"
+    assert bridge.calls.last.request.headers["Idempotency-Key"] == "key-bridge"
+
+
+def test_constructor_idempotency_key_not_leaked_to_other_endpoints(
+    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes
+) -> None:
+    balance = router.get("/balance").mock(
+        return_value=httpx.Response(200, json=success_payload([], ed25519_seed))
+    )
+    verify = router.post("/account/verify").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    update = router.put("/bank-account").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    quote = router.post("/bridge-quote").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    with CNGN(
+        api_key=API_KEY,
+        encryption_key=ENCRYPTION_KEY,
+        private_key=openssh_pem,
+        idempotency_key="operation-123",
+    ) as client:
+        client.get_balance()
+        client.verify_bank_account(bank_code="058", account_number="0123456789")
+        client.update_bank_account("GTBank", "ACME LTD", "0123456789")
+        client.get_bridge_quote(10, "n1", "n2", "0xabc")
+
+    for route in (balance, verify, update, quote):
+        assert "Idempotency-Key" not in route.calls.last.request.headers
+
+
+def test_constructor_default_used_and_per_call_overrides(
+    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes
+) -> None:
+    route = router.post("/withdraw").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    with CNGN(
+        api_key=API_KEY,
+        encryption_key=ENCRYPTION_KEY,
+        private_key=openssh_pem,
+        idempotency_key="default-key",
+    ) as client:
+        client.withdraw(amount=10, address="0xabc", network_id="n1")
+        assert route.calls.last.request.headers["Idempotency-Key"] == "default-key"
+        client.withdraw(amount=10, address="0xabc", network_id="n1", idempotency_key="call-key")
+        assert route.calls.last.request.headers["Idempotency-Key"] == "call-key"
+
+
+def test_no_idempotency_key_sends_no_header(
+    client: CNGN, router: respx.MockRouter, ed25519_seed: bytes
+) -> None:
+    route = router.post("/withdraw").mock(
+        return_value=httpx.Response(200, json=success_payload({}, ed25519_seed))
+    )
+    client.withdraw(amount=10, address="0xabc", network_id="n1")
+    assert "Idempotency-Key" not in route.calls.last.request.headers
+
+
+def test_retried_money_call_reuses_constructor_idempotency_key(
+    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes
+) -> None:
+    route = router.post("/withdraw").mock(
+        side_effect=[
+            httpx.Response(500, json={"status": 500, "message": "boom"}),
+            httpx.Response(200, json=success_payload({"trxRef": "wd-1"}, ed25519_seed)),
+        ]
+    )
+    with CNGN(
+        api_key=API_KEY,
+        encryption_key=ENCRYPTION_KEY,
+        private_key=openssh_pem,
+        idempotency_key="retry-key",
+    ) as client:
+        client._sleep = lambda delay: None
+        client.withdraw(amount=10, address="0xabc", network_id="n1")
+
+    assert route.call_count == 2
+    sent = [call.request.headers["Idempotency-Key"] for call in route.calls]
+    assert sent == ["retry-key", "retry-key"]
+
+
 def test_context_manager_closes(openssh_pem: str) -> None:
     with CNGN(api_key=API_KEY, encryption_key=ENCRYPTION_KEY, private_key=openssh_pem) as c:
         http = c._http

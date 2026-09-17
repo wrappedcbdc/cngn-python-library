@@ -20,6 +20,7 @@ class Endpoint:
     path: str
     builder: Callable[..., dict[str, Any] | None]
     parser: Callable[[Any], Any]
+    idempotent: bool = False  # accepts the Idempotency-Key middleware header
 
 
 def _no_body() -> None:
@@ -33,9 +34,13 @@ def _get(
 
 
 def _post(
-    path: str, builder: Callable[..., dict[str, Any]], parser: Callable[[Any], Any]
+    path: str,
+    builder: Callable[..., dict[str, Any]],
+    parser: Callable[[Any], Any],
+    *,
+    idempotent: bool = False,
 ) -> Endpoint:
-    return Endpoint("POST", path, builder, parser)
+    return Endpoint("POST", path, builder, parser, idempotent)
 
 
 def _parse_list(model: type[m.CNGNModel]) -> Callable[[Any], Any]:
@@ -85,6 +90,7 @@ CREATE_TEMPORARY_VIRTUAL_ACCOUNT = _post(
         **({"narration": narration} if narration is not None else {}),
     },
     _parse_one(m.TemporaryAccount),
+    idempotent=True,
 )
 
 REDEEM_ASSET = _post(
@@ -96,6 +102,7 @@ REDEEM_ASSET = _post(
         "saveDetails": save_details,
     },
     _parse_one(m.RedeemResult),
+    idempotent=True,
 )
 
 VERIFY_BANK_ACCOUNT = _post(
@@ -129,6 +136,7 @@ WITHDRAW = _post(
         "shouldSaveAddress": should_save_address,
     },
     _parse_one(m.WithdrawResult),
+    idempotent=True,
 )
 
 VERIFY_WITHDRAWAL = _get("/withdraw/verify/{trx_ref}", _parse_one(m.Transaction))
@@ -161,7 +169,7 @@ def _build_bridge(
     }
 
 
-BRIDGE = _post("/bridge", _build_bridge, _parse_one(m.BridgeResult))
+BRIDGE = _post("/bridge", _build_bridge, _parse_one(m.BridgeResult), idempotent=True)
 
 WHITELIST_ADDRESS = _post(
     "/whitelist",

@@ -36,7 +36,7 @@ def serialize_openssh_ed25519_private_key(seed: bytes, comment: bytes = b"cngn-t
     """
     verify_key = SigningKey(seed).verify_key.encode()
     public_blob = _openssh_string(b"ssh-ed25519") + _openssh_string(verify_key)
-    private_key_64 = verify_key + seed  # OpenSSH layout: public key || seed
+    private_key_64 = seed + verify_key  # OpenSSH layout: seed (32) || public key (32)
     checkint = 0x4C4E474E
 
     block = struct.pack(">I", checkint)

@@ -56,6 +56,7 @@ class AsyncCNGN:
         max_retries: int = 3,
         backoff_base: float = 1.0,
         backoff_cap: float = 30.0,
+        idempotency_key: str | None = None,
     ) -> None:
         self._config: ClientConfig = resolve_config(
             api_key,
@@ -67,6 +68,7 @@ class AsyncCNGN:
             max_retries=max_retries,
             backoff_base=backoff_base,
             backoff_cap=backoff_cap,
+            idempotency_key=idempotency_key,
         )
         self._http = httpx.AsyncClient(timeout=timeout, headers=self._config.headers)
 
@@ -92,6 +94,7 @@ class AsyncCNGN:
             prepared.url,
             params=prepared.query,
             json=prepared.json_body,
+            headers=prepared.headers,
         )
         try:
             payload = response.json()
@@ -101,8 +104,12 @@ class AsyncCNGN:
             payload = {"status": response.status_code, "message": str(payload)}
         return handle_response(response.status_code, payload, prepared, self._config)
 
-    async def _request(self, endpoint: ep.Endpoint, **kwargs: Any) -> Any:
-        prepared = prepare_request(endpoint, self._config, **kwargs)
+    async def _request(
+        self, endpoint: ep.Endpoint, idempotency_key: str | None = None, **kwargs: Any
+    ) -> Any:
+        prepared = prepare_request(
+            endpoint, self._config, idempotency_key=idempotency_key, **kwargs
+        )
         attempt = 0
         last_error: BaseException | None = None
         while True:
@@ -162,10 +169,18 @@ class AsyncCNGN:
         customer_name: str,
         account_name: str,
         narration: str | None = None,
+        idempotency_key: str | None = None,
     ) -> TemporaryAccount:
-        """Create a temporary NGN virtual account (min 100 NGN)."""
+        """Create a temporary NGN virtual account (min 100 NGN).
+
+        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
+        overrides the client-level default for this call. Automatic retries
+        of this money operation are only safe when a key is supplied, since
+        upstream idempotency is then active.
+        """
         return await self._request(
             ep.CREATE_TEMPORARY_VIRTUAL_ACCOUNT,
+            idempotency_key=idempotency_key,
             amount=amount,
             customer_email=customer_email,
             customer_name=customer_name,
@@ -179,10 +194,18 @@ class AsyncCNGN:
         bank_code: str,
         account_number: str,
         save_details: bool = False,
+        idempotency_key: str | None = None,
     ) -> RedeemResult:
-        """Redeem cNGN to a Nigerian bank account (min 1; 10-digit account)."""
+        """Redeem cNGN to a Nigerian bank account (min 1; 10-digit account).
+
+        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
+        overrides the client-level default for this call. Automatic retries
+        of this money operation are only safe when a key is supplied, since
+        upstream idempotency is then active.
+        """
         return await self._request(
             ep.REDEEM_ASSET,
+            idempotency_key=idempotency_key,
             amount=amount,
             bank_code=bank_code,
             account_number=account_number,
@@ -216,10 +239,18 @@ class AsyncCNGN:
         address: str,
         network_id: str,
         should_save_address: bool = False,
+        idempotency_key: str | None = None,
     ) -> WithdrawResult:
-        """Withdraw cNGN to an external wallet address."""
+        """Withdraw cNGN to an external wallet address.
+
+        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
+        overrides the client-level default for this call. Automatic retries
+        of this money operation are only safe when a key is supplied, since
+        upstream idempotency is then active.
+        """
         return await self._request(
             ep.WITHDRAW,
+            idempotency_key=idempotency_key,
             amount=amount,
             address=address,
             network_id=network_id,
@@ -253,10 +284,18 @@ class AsyncCNGN:
         destination_address: str,
         sender_address: str | None = None,
         callback_url: str | None = None,
+        idempotency_key: str | None = None,
     ) -> BridgeResult:
-        """Bridge cNGN from one network to another."""
+        """Bridge cNGN from one network to another.
+
+        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
+        overrides the client-level default for this call. Automatic retries
+        of this money operation are only safe when a key is supplied, since
+        upstream idempotency is then active.
+        """
         return await self._request(
             ep.BRIDGE,
+            idempotency_key=idempotency_key,
             origin_network_id=origin_network_id,
             destination_network_id=destination_network_id,
             destination_address=destination_address,

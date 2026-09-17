@@ -69,6 +69,7 @@ class ClientConfig:
     max_retries: int
     backoff_base: float
     backoff_cap: float
+    idempotency_key: str | None
 
     @property
     def aes_key(self) -> bytes:
@@ -93,6 +94,7 @@ def resolve_config(
     max_retries: int,
     backoff_base: float,
     backoff_cap: float,
+    idempotency_key: str | None,
 ) -> ClientConfig:
     inferred = Environment.from_api_key(api_key)
     if environment is None:
@@ -114,6 +116,7 @@ def resolve_config(
         max_retries=max_retries,
         backoff_base=backoff_base,
         backoff_cap=backoff_cap,
+        idempotency_key=idempotency_key,
     )
 
 
@@ -125,20 +128,37 @@ class PreparedRequest:
     query: dict[str, Any] | None
     json_body: dict[str, str] | None
     parser: Callable[[Any], Any]
+    idempotency_key: str | None = None
+
+    @property
+    def headers(self) -> dict[str, str] | None:
+        if self.idempotency_key:
+            return {"Idempotency-Key": self.idempotency_key}
+        return None
 
 
-def prepare_request(endpoint: ep.Endpoint, config: ClientConfig, **kwargs: Any) -> PreparedRequest:
-    """Build params → encrypt the body if present → produce a wire request."""
+def prepare_request(
+    endpoint: ep.Endpoint,
+    config: ClientConfig,
+    idempotency_key: str | None = None,
+    **kwargs: Any,
+) -> PreparedRequest:
+    """Build params → encrypt the body if present → produce a wire request.
+
+    The idempotency key (per-call, else the client default) is attached
+    only to endpoints flagged ``idempotent``; every retry then reuses it.
+    """
     path = endpoint.path.format(
         **{k: kwargs.pop(k) for k in list(kwargs) if f"{{{k}}}" in endpoint.path}
     )
     params = endpoint.builder(**kwargs)
     url = f"{config.base_url}{path}"
+    key = (idempotency_key or config.idempotency_key) if endpoint.idempotent else None
     if endpoint.method == "GET":
-        return PreparedRequest(endpoint.method, url, path, params, None, endpoint.parser)
+        return PreparedRequest(endpoint.method, url, path, params, None, endpoint.parser, key)
     plaintext = json.dumps(params or {}).encode()
     envelope = aes_encrypt(plaintext, config.aes_key)
-    return PreparedRequest(endpoint.method, url, path, None, envelope, endpoint.parser)
+    return PreparedRequest(endpoint.method, url, path, None, envelope, endpoint.parser, key)
 
 
 def compute_retry_delay(attempt: int, config: ClientConfig, error: BaseException | None) -> float:

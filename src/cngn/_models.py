@@ -2,14 +2,28 @@
 
 All models allow extra fields so new API fields never break parsing.
 Amounts are kept as strings exactly as the API returns them; no float
-conversion is performed, preserving decimal precision.
+conversion is performed, preserving decimal precision. Some endpoints
+return amounts as JSON numbers instead of strings — ``DecimalString``
+coerces those to plain decimal strings so both forms parse.
 """
 
 from __future__ import annotations
 
-from typing import Any
+from decimal import Decimal
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+
+
+def _coerce_decimal_string(value: Any) -> Any:
+    if isinstance(value, bool) or value is None or isinstance(value, str):
+        return value
+    if isinstance(value, int | float | Decimal):
+        return format(Decimal(str(value)), "f")
+    return value
+
+
+DecimalString = Annotated[str, BeforeValidator(_coerce_decimal_string)]
 
 
 class CNGNModel(BaseModel):
@@ -32,7 +46,7 @@ class Transaction(CNGNModel):
     id: str | None = None
     from_: str | None = Field(default=None, alias="from")
     receiver: Receiver | dict[str, Any] | str | None = None
-    amount: str | None = None
+    amount: DecimalString | None = None
     description: str | None = None
     created_at: str | None = Field(default=None, alias="createdAt")
     trx_ref: str | None = None
@@ -77,10 +91,10 @@ class VirtualAccount(CNGNModel):
 class TemporaryAccount(CNGNModel):
     reference: str | None = None
     payment_reference: str | None = Field(default=None, alias="paymentReference")
-    amount: str | None = None
-    amount_expected: str | None = Field(default=None, alias="amountExpected")
-    fee: str | None = None
-    vat: str | None = None
+    amount: DecimalString | None = None
+    amount_expected: DecimalString | None = Field(default=None, alias="amountExpected")
+    fee: DecimalString | None = None
+    vat: DecimalString | None = None
     currency: str | None = None
     status: str | None = None
     narration: str | None = None
@@ -114,9 +128,9 @@ class AccountVerification(CNGNModel):
 
 
 class BridgeQuote(CNGNModel):
-    amount_receivable: str | None = Field(default=None, alias="amountReceivable")
-    network_fee: str | None = Field(default=None, alias="networkFee")
-    bridge_fee: str | None = Field(default=None, alias="bridgeFee")
+    amount_receivable: DecimalString | None = Field(default=None, alias="amountReceivable")
+    network_fee: DecimalString | None = Field(default=None, alias="networkFee")
+    bridge_fee: DecimalString | None = Field(default=None, alias="bridgeFee")
 
 
 class BridgeResult(CNGNModel):
