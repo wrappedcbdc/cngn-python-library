@@ -53,9 +53,8 @@ class CNGN:
         timeout: Per-request timeout in seconds.
         max_retries: Retries for 429s, 5xx and transport errors.
         backoff_base / backoff_cap: Exponential backoff bounds in seconds.
-        idempotency_key: Default ``Idempotency-Key`` for the money endpoints
-            (temporary virtual accounts, redeem, withdraw, bridge); never
-            sent elsewhere. A per-call value overrides it.
+        idempotency_key: Default ``Idempotency-Key`` for temporary virtual
+            accounts, redeem, withdraw, and bridge. A per-call value overrides it.
     """
 
     def __init__(
@@ -186,10 +185,8 @@ class CNGN:
 
         ``account_name`` must be 3-50 characters; ``narration`` up to 100.
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return self._request(
             ep.CREATE_TEMPORARY_VIRTUAL_ACCOUNT,
@@ -211,10 +208,8 @@ class CNGN:
     ) -> RedeemResult:
         """Redeem cNGN to a Nigerian bank account (min 1; 10-digit account).
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return self._request(
             ep.REDEEM_ASSET,
@@ -256,10 +251,8 @@ class CNGN:
     ) -> WithdrawResult:
         """Withdraw cNGN to an external wallet address.
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return self._request(
             ep.WITHDRAW,
@@ -301,10 +294,8 @@ class CNGN:
     ) -> BridgeResult:
         """Bridge cNGN from one network to another.
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return self._request(
             ep.BRIDGE,

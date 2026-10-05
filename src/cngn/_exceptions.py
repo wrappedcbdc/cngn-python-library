@@ -1,7 +1,6 @@
 """Exception hierarchy for the cNGN SDK.
 
-Every API failure raises a subclass of :class:`CNGNError`; nothing is
-swallowed into ``{"success": False}`` dictionaries.
+API failures raise subclasses of :class:`CNGNError`.
 """
 
 from __future__ import annotations

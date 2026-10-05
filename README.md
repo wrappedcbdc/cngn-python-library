@@ -1,6 +1,6 @@
 # cngn
 
-Official Python SDK for the [cNGN API](https://docs.cngn.co), the regulated Nigerian Naira stablecoin. Async-first, with a synchronous client exposing the same surface. Requires Python 3.10+.
+Python client for the [cNGN API](https://docs.cngn.co). Includes async and synchronous clients. Requires Python 3.10+.
 
 ## Install
 

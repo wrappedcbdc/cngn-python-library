@@ -103,8 +103,7 @@ def resolve_config(
         resolved = Environment(environment)
         if resolved is not inferred:
             raise EnvironmentMismatchError(
-                f"API key is a '{inferred.value}' key but environment='{environment}' was "
-                "passed; credentials never cross environments"
+                f"API key environment '{inferred.value}' differs from '{environment}'"
             )
     return ClientConfig(
         api_key=api_key,
@@ -143,7 +142,7 @@ def prepare_request(
     idempotency_key: str | None = None,
     **kwargs: Any,
 ) -> PreparedRequest:
-    """Build params → encrypt the body if present → produce a wire request.
+    """Build a request and encrypt its body when present.
 
     The idempotency key (per-call, else the client default) is attached
     only to endpoints flagged ``idempotent``; every retry then reuses it.
@@ -169,7 +168,7 @@ def compute_retry_delay(attempt: int, config: ClientConfig, error: BaseException
 
 
 def is_retryable(http_status: int | None, error: BaseException | None) -> bool:
-    """Retry 429 (after the block), 5xx and transport errors; never other 4xx."""
+    """Retry 429, 5xx, and transport errors."""
     if isinstance(error, RateLimitError | ServiceUnavailableError):
         return True
     if isinstance(error, CNGNError):

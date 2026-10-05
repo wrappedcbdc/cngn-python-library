@@ -93,9 +93,7 @@ def _read_uint32(buf: io.BytesIO) -> int:
 def parse_openssh_ed25519_private_key(pem: str) -> bytes:
     """Parse an unencrypted ``openssh-key-v1`` Ed25519 PEM and return the 32-byte seed.
 
-    The format is parsed structurally (length-prefixed fields), not by marker
-    slicing. Encrypted private keys (``ciphername != "none"``) are rejected
-    with a clear error.
+    Parses length-prefixed fields. Encrypted private keys are rejected.
     """
     lines = [line.strip() for line in pem.strip().splitlines() if line.strip()]
     if not lines or lines[0] != _OPENSSH_PEM_HEADER or lines[-1] != _OPENSSH_PEM_FOOTER:

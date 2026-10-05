@@ -173,10 +173,8 @@ class AsyncCNGN:
     ) -> TemporaryAccount:
         """Create a temporary NGN virtual account (min 100 NGN).
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return await self._request(
             ep.CREATE_TEMPORARY_VIRTUAL_ACCOUNT,
@@ -198,10 +196,8 @@ class AsyncCNGN:
     ) -> RedeemResult:
         """Redeem cNGN to a Nigerian bank account (min 1; 10-digit account).
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return await self._request(
             ep.REDEEM_ASSET,
@@ -243,10 +239,8 @@ class AsyncCNGN:
     ) -> WithdrawResult:
         """Withdraw cNGN to an external wallet address.
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return await self._request(
             ep.WITHDRAW,
@@ -288,10 +282,8 @@ class AsyncCNGN:
     ) -> BridgeResult:
         """Bridge cNGN from one network to another.
 
-        ``idempotency_key`` is sent as the ``Idempotency-Key`` header and
-        overrides the client-level default for this call. Automatic retries
-        of this money operation are only safe when a key is supplied, since
-        upstream idempotency is then active.
+        ``idempotency_key`` overrides the client default. Automatic retries
+        require a key.
         """
         return await self._request(
             ep.BRIDGE,

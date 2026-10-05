@@ -105,7 +105,7 @@ def generate_wallet_address(
         from tronpy.keys import PrivateKey as TronPrivateKey
 
         tron_public_key = TronPrivateKey(private_key).public_key
-        if tron_public_key is None:  # tronpy types this Optional; a valid key never is
+        if tron_public_key is None:
             raise ValueError("Could not derive Tron public key")
         address = tron_public_key.to_base58check_address()
         return GeneratedWallet(network, address, "", private_key.hex(), phrase)
@@ -120,7 +120,7 @@ def generate_wallet_address(
 
 
 def validate_address(address: str, network: Network | str = Network.ETHEREUM) -> bool:
-    """Validate an address for ``network``; returns False (never raises)."""
+    """Return whether an address is valid for ``network``."""
     try:
         network = Network(network)
         if network in _EVM_NETWORKS:

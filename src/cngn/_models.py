@@ -1,10 +1,7 @@
 """Pydantic v2 models for cNGN API resources.
 
-All models allow extra fields so new API fields never break parsing.
-Amounts are kept as strings exactly as the API returns them; no float
-conversion is performed, preserving decimal precision. Some endpoints
-return amounts as JSON numbers instead of strings — ``DecimalString``
-coerces those to plain decimal strings so both forms parse.
+Models allow extra API fields. Amounts are normalized to decimal strings
+to preserve decimal precision.
 """
 
 from __future__ import annotations
