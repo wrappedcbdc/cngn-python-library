@@ -1,4 +1,4 @@
-"""Official Python SDK for the cNGN API, the regulated Naira stablecoin."""
+"""Python client for the cNGN API."""
 
 from ._async import AsyncCNGN
 from ._client import Environment
