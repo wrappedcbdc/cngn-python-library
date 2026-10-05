@@ -7,6 +7,7 @@ import base64
 import hashlib
 import json
 import struct
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
@@ -106,7 +107,7 @@ def success_payload(data: Any, seed: bytes) -> dict[str, Any]:
 
 
 @pytest.fixture()
-def router() -> respx.MockRouter:
+def router() -> Iterator[respx.MockRouter]:
     with respx.MockRouter(base_url=BASE_URL, assert_all_called=False) as router:
         yield router
 

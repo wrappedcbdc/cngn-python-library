@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import httpx
 import pytest
 import respx
@@ -10,6 +12,7 @@ from cngn import (
     CNGN,
     APIError,
     AuthenticationError,
+    CNGNError,
     DecryptionError,
     EncryptionError,
     IPWhitelistError,
@@ -23,9 +26,11 @@ from conftest import API_KEY, ENCRYPTION_KEY
 
 
 @pytest.fixture()
-def client(openssh_pem: str, router: respx.MockRouter) -> CNGN:
+def client(
+    openssh_pem: str, router: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> Iterator[CNGN]:
     c = CNGN(api_key=API_KEY, encryption_key=ENCRYPTION_KEY, private_key=openssh_pem)
-    c._sleep = lambda delay: None  # don't actually wait out retry delays
+    monkeypatch.setattr(c, "_sleep", lambda delay: None)
     yield c
     c.close()
 
@@ -61,7 +66,7 @@ def test_documented_error_messages(
     router: respx.MockRouter,
     http_status: int,
     message: str,
-    exception: type[Exception],
+    exception: type[CNGNError],
 ) -> None:
     _mock(router, http_status, {"status": http_status, "message": message})
     with pytest.raises(exception) as exc_info:

@@ -173,11 +173,8 @@ def test_decrypt_response_data_rejects_bad_base64(openssh_pem: str) -> None:
         decrypt_response_data("!!!", openssh_pem)
 
 
-# These two tests generate a real `ssh-keygen -t ed25519` keypair at test time
-# (no key material is checked in). They guard the OpenSSH private-block
-# layout: the 64-byte private field is seed (32) || public key (32) — taking
-# the wrong half as the seed silently derives a garbage key and every server
-# response becomes undecryptable.
+# The OpenSSH private field contains the seed followed by the public key.
+# Generate keys at test time to verify this layout.
 
 
 @pytest.fixture()

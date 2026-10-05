@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import base64
 import json
+from collections.abc import Iterator
 
 import httpx
 import pytest
@@ -21,7 +22,7 @@ from conftest import (
 
 
 @pytest.fixture()
-def client(openssh_pem: str, router: respx.MockRouter) -> CNGN:
+def client(openssh_pem: str, router: respx.MockRouter) -> Iterator[CNGN]:
     with CNGN(api_key=API_KEY, encryption_key=ENCRYPTION_KEY, private_key=openssh_pem) as c:
         yield c
 
@@ -491,7 +492,7 @@ def test_no_idempotency_key_sends_no_header(
 
 
 def test_retried_money_call_reuses_constructor_idempotency_key(
-    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes
+    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     route = router.post("/withdraw").mock(
         side_effect=[
@@ -505,7 +506,7 @@ def test_retried_money_call_reuses_constructor_idempotency_key(
         private_key=openssh_pem,
         idempotency_key="retry-key",
     ) as client:
-        client._sleep = lambda delay: None
+        monkeypatch.setattr(client, "_sleep", lambda delay: None)
         client.withdraw(amount=10, address="0xabc", network_id="n1")
 
     assert route.call_count == 2

@@ -78,6 +78,7 @@ def test_parse_webhook_round_trip() -> None:
     assert event.data.amount == "150000.00"
     assert event.data.trx_type == "fiat_buy"
     assert event.data.occurred_at == "2024-01-01T00:00:00Z"
+    assert event.data.model_extra is not None
     assert event.data.model_extra["future_field"] == "kept"
 
 

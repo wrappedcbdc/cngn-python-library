@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import AsyncIterator
 
 import httpx
 import pytest
@@ -18,7 +19,7 @@ from conftest import (
 
 
 @pytest.fixture()
-async def client(openssh_pem: str, router: respx.MockRouter) -> AsyncCNGN:
+async def client(openssh_pem: str, router: respx.MockRouter) -> AsyncIterator[AsyncCNGN]:
     async with AsyncCNGN(
         api_key=API_KEY, encryption_key=ENCRYPTION_KEY, private_key=openssh_pem
     ) as c:
@@ -134,7 +135,7 @@ async def test_no_idempotency_key_sends_no_header(
 
 
 async def test_retried_money_call_reuses_idempotency_key(
-    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes
+    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     route = router.post("/withdraw").mock(
         side_effect=[
@@ -149,7 +150,7 @@ async def test_retried_money_call_reuses_idempotency_key(
         async def _no_sleep(delay: float) -> None:
             pass
 
-        client._sleep = _no_sleep
+        monkeypatch.setattr(client, "_sleep", _no_sleep)
         await client.withdraw(
             amount=10, address="0xabc", network_id="n1", idempotency_key="retry-key"
         )

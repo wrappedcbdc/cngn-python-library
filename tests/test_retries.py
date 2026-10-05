@@ -1,6 +1,8 @@
-"""Retry-policy tests: 429/5xx/transport errors retried, other 4xx never."""
+"""Retry policy tests for transport, rate limit, and API errors."""
 
 from __future__ import annotations
+
+from collections.abc import Iterator
 
 import httpx
 import pytest
@@ -11,15 +13,17 @@ from conftest import API_KEY, ENCRYPTION_KEY, success_payload
 
 
 @pytest.fixture()
-def client(openssh_pem: str, router: respx.MockRouter) -> CNGN:
+def client(
+    openssh_pem: str, router: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> Iterator[CNGN]:
     c = CNGN(api_key=API_KEY, encryption_key=ENCRYPTION_KEY, private_key=openssh_pem)
-    c._sleep = lambda delay: None
+    monkeypatch.setattr(c, "_sleep", lambda delay: None)
     yield c
     c.close()
 
 
 def test_429_retried_then_succeeds(
-    client: CNGN, router: respx.MockRouter, ed25519_seed: bytes
+    client: CNGN, router: respx.MockRouter, ed25519_seed: bytes, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     route = router.get("/balance").mock(
         side_effect=[
@@ -30,7 +34,7 @@ def test_429_retried_then_succeeds(
         ]
     )
     delays: list[float] = []
-    client._sleep = delays.append
+    monkeypatch.setattr(client, "_sleep", delays.append)
     balances = client.get_balance()
     assert route.call_count == 2
     assert delays == [60.0]  # honors the 60-second block
@@ -38,7 +42,7 @@ def test_429_retried_then_succeeds(
 
 
 def test_5xx_retried_with_exponential_backoff(
-    client: CNGN, router: respx.MockRouter, ed25519_seed: bytes
+    client: CNGN, router: respx.MockRouter, ed25519_seed: bytes, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     route = router.get("/balance").mock(
         side_effect=[
@@ -48,7 +52,7 @@ def test_5xx_retried_with_exponential_backoff(
         ]
     )
     delays: list[float] = []
-    client._sleep = delays.append
+    monkeypatch.setattr(client, "_sleep", delays.append)
     assert client.get_balance() == []
     assert route.call_count == 3
     assert delays == [1.0, 2.0]  # backoff_base=1.0, doubling
@@ -103,7 +107,6 @@ def test_zero_max_retries(openssh_pem: str, router: respx.MockRouter) -> None:
         private_key=openssh_pem,
         max_retries=0,
     )
-    client._sleep = lambda delay: None
     route = router.get("/balance").mock(
         return_value=httpx.Response(
             429, json={"status": 429, "message": "Too many requests. Please try again later."}
@@ -116,7 +119,7 @@ def test_zero_max_retries(openssh_pem: str, router: respx.MockRouter) -> None:
 
 
 async def test_async_429_retried(
-    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes
+    openssh_pem: str, router: respx.MockRouter, ed25519_seed: bytes, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     async with AsyncCNGN(
         api_key=API_KEY, encryption_key=ENCRYPTION_KEY, private_key=openssh_pem
@@ -125,7 +128,7 @@ async def test_async_429_retried(
         async def _no_sleep(delay: float) -> None:
             pass
 
-        client._sleep = _no_sleep
+        monkeypatch.setattr(client, "_sleep", _no_sleep)
         route = router.get("/balance").mock(
             side_effect=[
                 httpx.Response(
